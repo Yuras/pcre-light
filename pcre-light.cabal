@@ -1,5 +1,5 @@
 name: pcre-light
-version: 0.4.0.4
+version: 0.4.0.6
 homepage: https://github.com/Daniel-Diaz/pcre-light
 synopsis: Portable regex library for Perl 5 compatible regular expressions
 description:
@@ -17,14 +17,22 @@ license-file:    LICENSE
 copyright:       (c) 2007-2010. Don Stewart <dons@galois.com>
 author:          Don Stewart
 maintainer:      Daniel Díaz <dhelta.diaz@gmail.com>
-cabal-version: >= 1.2.0
+cabal-version: >= 1.8.0
 build-type:      Simple
 tested-with:     GHC == 7.8.3
 extra-source-files: README.md
+                    cbits/pcre.h
+                    cbits/pcre_internal.h
+                    cbits/config.h
+                    cbits/ucp.h
 
 flag old_base
   description: Build with an old version of base (< 3)
   default:     False
+
+flag bundled
+  description: Build bundled version of pcre
+  default: True
 
 library
     exposed-modules: Text.Regex.PCRE.Light
@@ -38,5 +46,15 @@ library
     else
         build-depends: base >= 3 && <= 5, bytestring >= 0.9
 
-    pkgconfig-depends: libpcre
-
+    if flag(bundled)
+        include-dirs: cbits
+        c-sources: cbits/pcre_compile.c
+                   cbits/pcre_exec.c
+                   cbits/pcre_fullinfo.c
+                   cbits/pcre_tables.c
+                   cbits/pcre_globals.c
+                   cbits/pcre_newline.c
+                   cbits/pcre_chartables.c
+        cc-options: -DHAVE_CONFIG_H
+    else
+        pkgconfig-depends: libpcre
